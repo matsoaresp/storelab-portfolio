@@ -1,6 +1,10 @@
 (function () {
   "use strict";
   var D = window.PORTFOLIO || {};
+
+  // Sempre abre no inicio (sem #secao no link), inclusive ao recarregar.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  if (!location.hash) window.scrollTo(0, 0);
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
@@ -139,6 +143,14 @@
     ]));
   });
 
+  /* Rola so a fileira (horizontal) ate o item, sem mexer na rolagem da pagina. */
+  function rolarFileira(fileira, item) {
+    if (!fileira || !item) return;
+    var f = fileira.getBoundingClientRect(), r = item.getBoundingClientRect();
+    if (r.left < f.left) fileira.scrollLeft -= f.left - r.left + 8;
+    else if (r.right > f.right) fileira.scrollLeft += r.right - f.right + 8;
+  }
+
   /* ---------------- Abas + visualizador (diagramas e telas) ---------------- */
   var contadorAbas = 0;
   var visualizadores = [];
@@ -161,7 +173,7 @@
         painel.hidden = !sel;
       });
       if (focar) botoes[i].focus();
-      botoes[i].scrollIntoView({ block: "nearest", inline: "nearest" });
+      rolarFileira(lista.parentNode, botoes[i]);
     }
 
     abas.forEach(function (aba, i) {
@@ -249,7 +261,7 @@
         b.classList.toggle("ativo", j === atual);
         b.setAttribute("aria-current", j === atual ? "true" : "false");
       });
-      if (multiplos) botoesMini[atual].scrollIntoView({ block: "nearest", inline: "nearest" });
+      if (multiplos) rolarFileira(miniaturas, botoesMini[atual]);
       [atual + 1, atual - 1].forEach(function (j) { // pre-carrega vizinhos
         var v = itens[(j + itens.length) % itens.length]; if (v) { var p = new Image(); p.src = v.img; }
       });
